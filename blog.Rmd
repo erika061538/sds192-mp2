@@ -17,6 +17,8 @@ load("contributions.rda")
 library(dplyr)
 library(ggplot2)
 library(tidyverse)
+library(RColorBrewer)
+library(ggthemes)
 ```
 
 ```{r}
@@ -45,6 +47,7 @@ candidate_year
 ```
 
 ```{r,warning=FALSE,echo=FALSE}
-ggplot(candidate_year, aes(x=cand_election_yr,y=num_cand))+geom_line()
+myPlot <- ggplot(candidate_year, aes(x=cand_election_yr,y=num_cand))+geom_bar(stat = "identity")
+myPlot + theme_economist() + scale_fill_economist()
 ```
 
