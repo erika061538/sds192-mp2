@@ -1,12 +1,9 @@
 ---
 title: "Mini-Project 2"
-author: "Your Name Here"
-date: "March 24, 2017"
+author: "Van Nguyen, Erika Chao, Sherri Lin"
+date: "March 26, 2017"
 output: html_document
 ---
-
-
-## Loading the data
 
 
 ```{r, include=FALSE}
@@ -15,3 +12,38 @@ load("candidates.rda")
 load("committees.rda")
 load("contributions.rda")
 ```
+
+```{r, message=FALSE,echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+```
+
+```{r}
+candidate_result <- function(party_arg){
+  candidates %>%
+  filter(cand_party_affiliation == party_arg) %>%
+  full_join(house_elections,by=c("cand_id"="fec_id")) %>% #join the two tables by candidates' id
+  select(cand_id, cand_name, cand_party_affiliation, cand_election_yr,incumbent) 
+}
+
+candidate_result(party_arg = "DEM") #show the candidates who are in the deomocratic party
+```
+
+```{r}
+candidate_result(party_arg = "REP") #show the candidates who are in the republic party
+```
+
+```{r}
+candidate_year <- candidates %>%
+  full_join(house_elections,by=c("cand_id"="fec_id")) %>%
+  select(cand_id, cand_name, cand_party_affiliation, cand_election_yr) %>%
+  group_by(cand_election_yr) %>%
+  summarize(num_cand = n())
+candidate_year
+```
+
+```{r,warning=FALSE,echo=FALSE}
+ggplot(candidate_year, aes(x=cand_election_yr,y=num_cand))+geom_line()
+```
+
