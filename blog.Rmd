@@ -33,6 +33,7 @@ candidate_result(party_arg = "DEM") #show the candidates who are in the deomocra
 ```{r}
 candidate_result(party_arg = "REP") #show the candidates who are in the republic party
 ```
+We can see that the number of candidates in the Republican Party is bigger than that in the Democratic Party. 
 
 ```{r}
 candidate_year <- candidates %>%
