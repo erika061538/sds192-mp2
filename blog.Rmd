@@ -51,3 +51,4 @@ myPlot <- ggplot(candidate_year, aes(x=cand_election_yr,y=num_cand))+geom_bar(st
 myPlot + theme_economist() + scale_fill_economist()
 ```
 
+As we can see from the graph, the number of candidates in the election cycle 2012 is the largest, with 3513 candidates. Top 4 years with largest number of candidates are 2012, 2010, 2008, and 2006. In 2008, the year when Barack Obama was elected, there were 472 candidates. 
