@@ -22,9 +22,10 @@ library(ggthemes)
 ```
 
 ```{r}
+#filter candidates based on their parties
 candidate_result <- function(party_arg){
-  candidates %>%
-  filter(cand_party_affiliation == party_arg) %>%
+  candidates %>% 
+  filter(cand_party_affiliation == party_arg) %>%  #filter the parties
   full_join(house_elections,by=c("cand_id"="fec_id")) %>% #join the two tables by candidates' id
   select(cand_id, cand_name, cand_party_affiliation, cand_election_yr,incumbent) 
 }
@@ -38,10 +39,11 @@ candidate_result(party_arg = "REP") #show the candidates who are in the republic
 We can see that the number of candidates in the Republican Party is bigger than that in the Democratic Party. 
 
 ```{r}
+#number of candidates over the years
 candidate_year <- candidates %>%
   full_join(house_elections,by=c("cand_id"="fec_id")) %>%
   select(cand_id, cand_name, cand_party_affiliation, cand_election_yr) %>%
-  group_by(cand_election_yr) %>%
+  group_by(cand_election_yr) %>% 
   summarize(num_cand = n())
 candidate_year
 ```
@@ -51,3 +53,4 @@ myPlot <- ggplot(candidate_year, aes(x=cand_election_yr,y=num_cand))+geom_bar(st
 myPlot + theme_economist() + scale_fill_economist()
 ```
 
+As we can see from the graph, the number of candidates in the election cycle 2012 is the largest, with 3513 candidates. Top 4 years with largest number of candidates are 2012, 2010, 2008, and 2006. In 2008, the year when Barack Obama was elected, there were 472 candidates. 
