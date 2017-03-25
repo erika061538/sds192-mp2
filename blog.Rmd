@@ -22,7 +22,7 @@ library(ggthemes)
 ```
 
 ```{r}
-#filter candidates who ran for house election based on their parties
+# Filter candidates who ran for house election based on their parties
 candidate_result <- function(party_arg){
   candidates %>% 
   filter(cand_party_affiliation == party_arg) %>%  #filter the parties
@@ -34,7 +34,7 @@ candidate_result(party_arg = "REP") #show the candidates who are in the republic
 ```
 
 ```{r}
-#number of candidates who ran for house election in the two major parties
+# Number of candidates who ran for house election in the two major parties
 candidate_party <- candidates %>%
   left_join(house_elections,by=c("cand_id"="fec_id")) %>%
   select(cand_id, cand_name, cand_party_affiliation, cand_election_yr) %>%
@@ -42,6 +42,8 @@ candidate_party <- candidates %>%
   filter(cand_party_affiliation == "REP"|cand_party_affiliation == "DEM") %>%
   summarize(n_cand = n()) 
 candidate_party
+
+# Plot the result
 myPlot1 <- ggplot(candidate_party, aes(x=cand_party_affiliation,y=n_cand, fill=cand_party_affiliation))+
   geom_bar(stat = "identity")  + labs(x="Candidate Party Affiliation",y="Number of Candidates") 
 myPlot1 + scale_fill_brewer(palette ="Set1",direction=-1) + theme_classic()+ theme(legend.title=element_blank())
@@ -49,16 +51,15 @@ myPlot1 + scale_fill_brewer(palette ="Set1",direction=-1) + theme_classic()+ the
 We can see that the number of candidates in the Republican Party is bigger than that in the Democratic Party. 
 
 ```{r}
-#number of candidates over the years
+# Number of candidates over the years
 candidate_year <- candidates %>%
   left_join(house_elections,by=c("cand_id"="fec_id")) %>%
   select(cand_id, cand_name, cand_party_affiliation, cand_election_yr) %>%
   group_by(cand_election_yr) %>% 
   summarize(num_cand = n())
 candidate_year
-```
 
-```{r, warning = FALSE, echo = FALSE}
+# Plot the result
 myPlot2 <- ggplot(candidate_year, aes(x=cand_election_yr,y=num_cand))+geom_bar(stat = "identity")
 myPlot2 + theme_classic()
 ```
@@ -66,11 +67,16 @@ myPlot2 + theme_classic()
 As we can see from the graph, the number of candidates in the election cycle 2012 is the largest, with 3513 candidates. Top 4 years with largest number of candidates are 2012, 2010, 2008, and 2006. In 2008, the year when Barack Obama was elected, there were 472 candidates. 
 
 ```{r}
-candidates_year_state <- candidates %>%
+# Number of democratic and republican candidates running in each state
+candidates_state <- candidates %>%
   filter(cand_party_affiliation == "DEM" | cand_party_affiliation == "REP") %>%
   select(cand_id, cand_name, cand_party_affiliation, cand_office_state) %>%
   group_by(cand_office_state, cand_party_affiliation) %>% 
   summarize(num_cand = n())
-candidates_year_state
+candidates_state
+
+# Plot the result
+myPlot3 <- ggplot(candidates_state, aes(x=cand_office_state,y=num_cand))+geom_bar(stat = "identity")
+myPlot3 + theme_classic()
 ```
 
