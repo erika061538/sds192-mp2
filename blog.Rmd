@@ -5,6 +5,8 @@ date: "March 26, 2017"
 output: html_document
 ---
 
+### Topic
+We are interested in looking at the number of candidates running for house elections over the years, of Democratic and Republican Party, and among states.
 
 ```{r, include=FALSE}
 load("house_elections.rda")
@@ -21,47 +23,79 @@ library(RColorBrewer)
 library(ggthemes)
 ```
 
-1) Writing a function to filter candidates based on their party affiliation rather than re-writing the same code multiple times. Verbs used: `filter` and `select`
+### Data Manipulation & Analysis
+We wrote a function to filter candidates who ran for house elections based on their party affiliation rather than re-writing the same code multiple times. Verbs used: `filter` and `select`.
+We also used `left_join` to join the `candidates` and `house_elections` tables by the candidates' id.
 
 ```{r}
-candidate_result <- function(party_arg){
+candidate_parties <- function(party_arg){
   candidates %>% 
-  full_join(house_elections,by=c("cand_id"="fec_id")) %>%
   filter(cand_party_affiliation == party_arg) %>%  #filter the parties
+  left_join(house_elections,by=c("cand_id"="fec_id")) %>% #join the two tables by candidates' id
   select(cand_id, cand_name, cand_party_affiliation, cand_election_yr,incumbent) 
 }
-candidate_result(party_arg = "DEM") #show the candidates who are in the deomocratic party
+candidate_parties(party_arg = "DEM") #show the candidates who are in the deomocratic party
+candidate_parties(party_arg = "REP") #show the candidates who are in the republic party
 ```
+A way to plot the number of candidates running for house elections based on parties 
 
 ```{r}
-candidate_result(party_arg = "REP") #show the candidates who are in the republic party
+candidate_party <- candidates %>%
+  left_join(house_elections,by=c("cand_id"="fec_id")) %>%
+  select(cand_id, cand_name, cand_party_affiliation, cand_election_yr) %>%
+  group_by(cand_party_affiliation) %>% 
+  filter(cand_party_affiliation == "REP"| cand_party_affiliation == "DEM") %>%
+  summarize(n_cand = n()) 
+candidate_party
 ```
+
+Plot the result
+```{r}
+myPlot1 <- ggplot(candidate_party, aes(x=cand_party_affiliation,y=n_cand, fill=cand_party_affiliation))+
+  geom_bar(stat = "identity")  + labs(x="Candidate Party Affiliation",y="Number of Candidates") 
+myPlot1 + scale_fill_brewer(palette ="Set1",direction=-1) + theme_classic()+ theme(legend.title=element_blank())
+```
+
 Observation: We can see that the number of candidates in the Republican Party is bigger than that in the Democratic Party. 
 
-2) Next, we want to find the number of candidates over the years. Verbs used: `select`, `group_by`, `summarize`
+Next, we want to find the number of candidates over the years. Verbs used: `select`, `group_by`, `summarize`
 
 ```{r}
 candidate_year <- candidates %>%
-  full_join(house_elections,by=c("cand_id"="fec_id")) %>%
+  left_join(house_elections,by=c("cand_id"="fec_id")) %>%
   select(cand_id, cand_name, cand_party_affiliation, cand_election_yr) %>%
   group_by(cand_election_yr) %>% 
   summarize(num_cand = n())
 candidate_year
 ```
 
-```{r, warning = FALSE, echo = FALSE}
-myPlot <- ggplot(candidate_year, aes(x=cand_election_yr,y=num_cand))+geom_bar(stat = "identity")
-myPlot + theme_economist() + scale_fill_economist()
+Plot the result
+```{r, warning = FALSE}
+myPlot2 <- ggplot(candidate_year, aes(x=cand_election_yr,y=num_cand))+geom_bar(stat = "identity")
+myPlot2 + theme_classic()
 ```
 
-As we can see from the graph, the number of candidates in the election cycle 2012 is the largest, with 3513 candidates. Top 4 years with largest number of candidates are 2012, 2010, 2008, and 2006. In 2008, the year when Barack Obama was elected, there were 472 candidates. 
+Observation: As we can see from the graph, the number of candidates in the election cycle 2012 is the largest, with 3513 candidates. Top 4 years with largest number of candidates are 2012, 2010, 2008, and 2006. In 2008, the year when Barack Obama was elected, there were 472 candidates. 
 
+We want to look at the number of Democratic and Republican candidates running in each state. Verb used: `filter`, `select`, `group_by`, `summarize`
 ```{r}
-candidates_year_state <- candidates %>%
+candidates_state <- candidates %>%
   filter(cand_party_affiliation == "DEM" | cand_party_affiliation == "REP") %>%
   select(cand_id, cand_name, cand_party_affiliation, cand_office_state) %>%
-  group_by(cand_office_state, cand_party_affiliation) %>% 
+  group_by(cand_office_state, cand_party_affiliation) %>%
   summarize(num_cand = n())
-candidates_year_state
+candidates_state
 ```
 
+Plot the result for the candidates in Democratic Party by states. We can see some main states are CA, IL, NY, TX.
+```{r}
+candidates_state_dem <- candidates %>%
+  filter(cand_party_affiliation == "DEM") %>%
+  select(cand_id, cand_name, cand_party_affiliation, cand_office_state) %>%
+  group_by(cand_office_state, cand_party_affiliation) %>%
+  summarize(num_cand = n())
+candidates_state_dem
+
+myPlot3 <- ggplot(candidates_state_dem, aes(x=cand_office_state,y=num_cand))+geom_bar(stat = "identity")
+myPlot3 + theme_classic()
+```
