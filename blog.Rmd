@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ### Topic
-We are interested in looking at the number of candidates running for house elections over the years, of Democratic and Republican Party, and among states.
+We are interested in the `candidates` and `house_elections` tables, looking at the number of candidates over the years, between Democratic and Republican Party, and among states. We also want to see which party that states support. 
 
 ```{r, include=FALSE}
 load("house_elections.rda")
@@ -24,7 +24,7 @@ library(ggthemes)
 ```
 
 ### Data Manipulation & Analysis
-We wrote a function to filter candidates who ran for house elections based on their party affiliation rather than re-writing the same code multiple times. Verbs used: `filter` and `select`.
+We wrote a function to filter number of candidates based on their party affiliation rather than re-writing the same code multiple times. Verbs used: `filter` and `select`.
 We also used `left_join` to join the `candidates` and `house_elections` tables by the candidates' id.
 
 ```{r}
@@ -32,12 +32,12 @@ candidate_parties <- function(party_arg){
   candidates %>% 
   filter(cand_party_affiliation == party_arg) %>%  #filter the parties
   left_join(house_elections,by=c("cand_id"="fec_id")) %>% #join the two tables by candidates' id
-  select(cand_id, cand_name, cand_party_affiliation, cand_election_yr,incumbent) 
+  select(cand_id, cand_name, cand_party_affiliation, cand_election_yr, incumbent) 
 }
 candidate_parties(party_arg = "DEM") #show the candidates who are in the deomocratic party
 candidate_parties(party_arg = "REP") #show the candidates who are in the republic party
 ```
-A way to plot the number of candidates running for house elections based on parties 
+A way to plot the number of candidates based on parties 
 
 ```{r}
 candidate_party <- candidates %>%
@@ -94,8 +94,21 @@ candidates_state_dem <- candidates %>%
   select(cand_id, cand_name, cand_party_affiliation, cand_office_state) %>%
   group_by(cand_office_state, cand_party_affiliation) %>%
   summarize(num_cand = n())
-candidates_state_dem
 
+#Plot
 myPlot3 <- ggplot(candidates_state_dem, aes(x=cand_office_state,y=num_cand))+geom_bar(stat = "identity")
 myPlot3 + theme_classic()
 ```
+
+Now we want to look at the `house_elections` table for number of Democratics and Republican candidates in each state. Same function as above.
+```{r}
+candidates_state_house <- house_elections %>%
+  filter(party == "D" | party == "R") %>%
+  select(state, party) %>%
+  group_by(state, party) %>%
+  summarize(num_cand = n())
+candidates_state_house
+```
+
+
+
