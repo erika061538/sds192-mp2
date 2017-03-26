@@ -87,7 +87,7 @@ candidates_state <- candidates %>%
 candidates_state
 ```
 
-Plot the result for the candidates in Democratic Party by states. We can see some main states are CA, IL, NY, TX.
+Plot the result for the candidates in Democratic Party by states. We can see some states with large number of candidates are CA, IL, NY, TX.
 ```{r}
 candidates_state_dem <- candidates %>%
   filter(cand_party_affiliation == "DEM") %>%
@@ -110,5 +110,8 @@ candidates_state_house <- house_elections %>%
 candidates_state_house
 ```
 
+From the table, we can see that, for example, IL and MA support Democratic Party (blue states), CO and WA support Republic Party (red states)
 
+### Blog Post Text
+Since the 2000 United States presidential election, red states and blue states have referred to states of the United States whose residents predominantly vote for either the Republican Party (red) or Democratic Party (blue) presidential candidates. A purple state refers to a swing state where both Democratic and Republican candidates receive strong support without an overwhelming majority of support for either party.
 
