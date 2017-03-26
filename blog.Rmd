@@ -6,7 +6,10 @@ output: html_document
 ---
 
 ### Topic
-We are interested in the `candidates` and `house_elections` tables, looking at the number of candidates over the years, between Democratic and Republican Party, and among states. We also want to see which party that states support. 
+Since the 2000 United States presidential election, red states and blue states have referred to states of the United States whose residents predominantly vote for either the Republican Party (red) or Democratic Party (blue) presidential candidates. A purple state refers to a swing state where both Democratic and Republican candidates receive strong support without an overwhelming majority of support for either party. For this project, we will observe the different trends amongst the states.
+
+We will use the `candidates` and `house_elections` tables, looking at the number of candidates over the years, between Democratic and Republican Party, and among states. We also want to see which party that states support. 
+ 
 
 ```{r, include=FALSE}
 load("house_elections.rda")
@@ -26,7 +29,6 @@ library(ggthemes)
 ### Data Manipulation & Analysis
 We wrote a function to filter number of candidates based on their party affiliation rather than re-writing the same code multiple times. Verbs used: `filter` and `select`.
 We also used `left_join` to join the `candidates` and `house_elections` tables by the candidates' id.
-
 ```{r}
 candidate_parties <- function(party_arg){
   candidates %>% 
@@ -50,40 +52,40 @@ candidate_party <- candidates %>%
 
 Plot the result
 ```{r, warning = FALSE}
+#create a bar graph of the number of candidates for Dem and Rep
 myPlot1 <- ggplot(candidate_party, aes(x=cand_party_affiliation,y=n_cand, fill=cand_party_affiliation))+
   geom_bar(stat = "identity")  + labs(x="Candidate Party Affiliation",y="Number of Candidates") 
-myPlot1 + scale_fill_brewer(palette ="Set1",direction=-1) + theme_classic()+ theme(legend.title=element_blank())
+myPlot1 + scale_fill_brewer(palette ="Set1",direction=-1) + theme_classic()+ theme(legend.title=element_blank()) #color code data for Dem and Rep
 ```
-
 Observation: We can see that the number of candidates in the Republican Party is bigger than that in the Democratic Party. 
 
 
 Next, we want to find the number of candidates over the years. Verbs used: `select`, `group_by`, `summarize`
 ```{r}
 candidate_year <- candidates %>%
-  left_join(house_elections,by=c("cand_id"="fec_id")) %>%
-  select(cand_id, cand_name, cand_party_affiliation, cand_election_yr) %>%
-  group_by(cand_election_yr) %>% 
-  summarize(num_cand = n())
+  left_join(house_elections,by=c("cand_id"="fec_id")) %>% #join candidates and house elections
+  select(cand_id, cand_name, cand_party_affiliation, cand_election_yr) %>% 
+  group_by(cand_election_yr) %>% #group data by the election year
+  summarize(num_cand = n()) #summarize data
 ```
 
 Plot the result
 ```{r, warning = FALSE}
+#create bar graph of the number of candidates for each state
 myPlot2 <- ggplot(candidate_year, aes(x=cand_election_yr,y=num_cand))+geom_bar(stat = "identity")+ 
-  labs(x="Candidate Election Year",y="Number of Candidates")
+  labs(x="Candidate Election Year",y="Number of Candidates") 
 myPlot2 + theme_classic()
 ```
-
 Observation: As we can see from the graph, the number of candidates in the election cycle 2012 is the largest, with 3513 candidates. Top 4 years with largest number of candidates are 2012, 2010, 2008, and 2006. In 2008, the year when Barack Obama was elected, there were 472 candidates. 
 
 
 We want to look at the number of Democratic and Republican candidates running in each state. Verb used: `filter`, `select`, `group_by`, `summarize`
 ```{r}
 candidates_state <- candidates %>%
-  filter(cand_party_affiliation == "DEM" | cand_party_affiliation == "REP") %>%
-  select(cand_id, cand_name, cand_party_affiliation, cand_office_state) %>%
-  group_by(cand_office_state, cand_party_affiliation) %>%
-  summarize(num_cand = n()) 
+  filter(cand_party_affiliation == "DEM" | cand_party_affiliation == "REP") %>% #filter data by Dem and Rep
+  select(cand_id, cand_name, cand_party_affiliation, cand_office_state) %>% 
+  group_by(cand_office_state, cand_party_affiliation) %>% #group by office state and party affiliation
+  summarize(num_cand = n()) #summarize the data
 ```
 
 Plot the result
@@ -95,24 +97,20 @@ myPlot3 <- ggplot(candidates_state, aes(x=cand_office_state,y=num_cand,fill=cand
 myPlot3 + theme_classic() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
                                   legend.position = "top",legend.title=element_blank())
 ```
-
-Observation: We can see some states with large number of democratic candidates are California, Texas, Illinois, and New York; while some states with large number of republican candidates are California,Texas, and Florida.From total number of candidates in each state, we can see that Califonia has the most cnadidates. 
+Observation: We can see some states with large number of democratic candidates are California, Texas, Illinois, and New York; while some states with large number of republican candidates are California, Texas, and Florida. From total number of candidates in each state, we can see that California has the most candidates. 
 
 
 Now we want to look at the `house_elections` table for number of Democratics and Republican candidates in each state. Same function as above.
 ```{r}
 candidates_state_house <- house_elections %>%
-  filter(party == "D" | party == "R") %>%
-  select(state, party) %>%
-  group_by(state, party) %>%
-  summarize(num_cand = n()) %>% 
-  spread(key = "party", value = "num_cand") %>%
+  filter(party == "D" | party == "R") %>% #filter by party
+  select(state, party) %>% 
+  group_by(state, party) %>% #group by states and parties
+  summarize(num_cand = n()) %>% #summarize data
+  spread(key = "party", value = "num_cand") %>% 
   replace_na(list(D = 0, R = 0)) %>%
-  rename(Democrats=D, Republicans=R) %>%
-  head(55)
-print(candidates_state_house)
+  rename(Democrats=D, Republicans=R) 
+candidates_state_house
 ```
-From the table, we can see that, for example, IL and MA support Democratic Party (blue states), CO and WA support Republic Party (red states)
+From the table, we can see that, for example, IL and MA support Democratic Party (blue states), CO and WA support Republic Party (red states).
 
-### Blog Post Text
-Since the 2000 United States presidential election, red states and blue states have referred to states of the United States whose residents predominantly vote for either the Republican Party (red) or Democratic Party (blue) presidential candidates. A purple state refers to a swing state where both Democratic and Republican candidates receive strong support without an overwhelming majority of support for either party.
